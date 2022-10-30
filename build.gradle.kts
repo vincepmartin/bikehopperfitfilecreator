@@ -1,7 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.10"
+    // kotlin("jvm") version "1.5.10"
+    kotlin("jvm") version "1.7.20"
     application
 }
 
@@ -9,15 +10,14 @@ group = "net.finalatomicbuster"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    jcenter()
+    // jcenter()
     mavenCentral()
 }
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("io.ktor:ktor-server-netty:1.5.2")
-    implementation("io.ktor:ktor-html-builder:1.5.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.2")
+    implementation("io.javalin:javalin:5.1.3")
+    implementation("org.slf4j:slf4j-simple:2.0.3")
 }
 
 tasks.test {
