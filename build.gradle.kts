@@ -18,6 +18,7 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("io.javalin:javalin:5.1.3")
     implementation("org.slf4j:slf4j-simple:2.0.3")
+    implementation(files("lib/fit.jar"))
 }
 
 tasks.test {

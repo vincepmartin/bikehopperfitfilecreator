@@ -1,4 +1,5 @@
 import io.javalin.Javalin
+import com.garmin.fit.Fit
 
 fun main() {
     println("Starting up Bike Hopper Fit File Creator Version 1.0")
