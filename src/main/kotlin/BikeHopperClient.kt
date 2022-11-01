@@ -1,15 +1,28 @@
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.logging.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import io.ktor.serialization.kotlinx.json.*
+
+import bikeHopperData.RouteData
 
 public class BikeHopperClient() {
     private val url = "https://api-bikehopper-staging.techlabor.org"
     private val client = HttpClient(CIO) {
         install(Logging)
+        install(ContentNegotiation) {
+             json(Json {
+                    prettyPrint = true
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                })
+        }
     }
 
     // TODO: Eventually make this grab params from the front end that are passed to Javalin.  For now just use this manual version.
@@ -36,6 +49,10 @@ public class BikeHopperClient() {
                 }
             }
             // TODO: Serialize the data in response into RouteData
+            println("Hit api...")
+            val routeData: RouteData = response.body()
+            println("routeData type: ")
+            println(routeData.paths[0].points.type)
         }
     }
 }
