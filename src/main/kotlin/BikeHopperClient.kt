@@ -12,7 +12,7 @@ public class BikeHopperClient() {
         install(Logging)
     }
 
-    // TODO: Eventually make this grab params from the front end.  For now just use this manual version.
+    // TODO: Eventually make this grab params from the front end that are passed to Javalin.  For now just use this manual version.
     fun fetchRoute(params: Map<String, List<String>>) {
         runBlocking {
             val response: HttpResponse = client.get(url) {
@@ -35,8 +35,6 @@ public class BikeHopperClient() {
                     parameters.append("point","37.79183,-122.39415")
                 }
             }
-            println("About to access $url")
-            println(response.bodyAsText())
         }
     }
 }
