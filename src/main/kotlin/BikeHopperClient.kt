@@ -35,6 +35,7 @@ public class BikeHopperClient() {
                     parameters.append("point","37.79183,-122.39415")
                 }
             }
+            // TODO: Serialize the data in response into RouteData
         }
     }
 }
