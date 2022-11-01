@@ -14,4 +14,4 @@ I am going to use the following
 - Kotlin (https://kotlinlang.org/)
 - Javalin (https://javalin.io/)
 - Garmin SDK (https://developer.garmin.com/fit/download/)
-- khttp /* Possibly...*/ (https://khttp.readthedocs.io/en/latest/#)
+- ktor-client (https://ktor.io/docs)
