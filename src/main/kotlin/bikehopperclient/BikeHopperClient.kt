@@ -1,3 +1,5 @@
+package bikehopperclient
+
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -10,9 +12,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import io.ktor.serialization.kotlinx.json.*
 
-import bikeHopperData.RouteData
+import bikehopperclient.RouteData
 
 public class BikeHopperClient() {
+    // TODO: Have the url chosen via some env var or flag or something
     private val url = "https://api-bikehopper-staging.techlabor.org"
     private val client = HttpClient(CIO) {
         install(Logging)
@@ -26,7 +29,8 @@ public class BikeHopperClient() {
     }
 
     // TODO: Eventually make this grab params from the front end that are passed to Javalin.  For now just use this manual version.
-    fun fetchRoute(params: Map<String, List<String>>) {
+    fun fetchRoute(params: Map<String, List<String>>): RouteData {
+        val routeData: RouteData
         runBlocking {
             val response: HttpResponse = client.get(url) {
                 url {
@@ -48,11 +52,9 @@ public class BikeHopperClient() {
                     parameters.append("point","37.79183,-122.39415")
                 }
             }
-            // TODO: Serialize the data in response into RouteData
-            println("Hit api...")
-            val routeData: RouteData = response.body()
-            println("routeData type: ")
-            println(routeData.paths[0].points.type)
+            // TODO: Make sure you have all the data that you need.
+            routeData = response.body()
         }
+        return routeData
     }
 }

@@ -1,4 +1,4 @@
-package bikeHopperData
+package bikehopperclient
 import kotlinx.serialization.Serializable
 
 @kotlinx.serialization.Serializable
