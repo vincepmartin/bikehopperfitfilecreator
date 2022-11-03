@@ -3,6 +3,7 @@ package bikehopperfilecreator
 import bikehopperclient.RouteData
 import com.garmin.fit.*
 import com.garmin.fit.util.SemicirclesConverter
+import java.nio.file.FileSystem
 import java.util.*
 
 class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
@@ -12,7 +13,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
     private var lastTimeStamp: DateTime = DateTime(Date())
     private val PRODUCTID = 0
 
-    fun getFile() {
+    fun getFile(): java.io.File {
         // Open file
         try {
             fileEncoder = FileEncoder(java.io.File(fileName), Fit.ProtocolVersion.V2_0)
@@ -36,6 +37,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
             e.printStackTrace()
         }
 
+        return java.io.File("nachos.fit")
         println("Encoded FIT file $fileName")
     }
 

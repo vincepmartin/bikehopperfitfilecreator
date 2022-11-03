@@ -1,4 +1,5 @@
 import bikehopperclient.BikeHopperClient
+import bikehopperfilecreator.BikeHopperFileCreator
 import io.javalin.Javalin
 
 fun main() {
@@ -9,7 +10,10 @@ fun main() {
             println("request...")
             println(ctx.queryParamMap())
             val bhClient = BikeHopperClient()
-            bhClient.fetchRoute(params = ctx.queryParamMap())
+            val routeData = bhClient.fetchRoute(params = ctx.queryParamMap())
+            val bikeHopperFileCreator = BikeHopperFileCreator("nachos.fit", routeData)
+            ctx.contentType("application/vnd.ant.fit")
+            ctx.result(bikeHopperFileCreator.getFile().inputStream())
         }
         .start(9001)
 }
