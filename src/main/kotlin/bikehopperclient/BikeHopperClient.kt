@@ -13,6 +13,7 @@ import kotlinx.serialization.json.Json
 import io.ktor.serialization.kotlinx.json.*
 
 import bikehopperclient.RouteData
+import bikehopperfilecreator.BikeHopperFileCreator
 
 public class BikeHopperClient() {
     // TODO: Have the url chosen via some env var or flag or something
@@ -55,11 +56,12 @@ public class BikeHopperClient() {
             // TODO: Make sure you have all the data that you need.
             routeData = response.body()
         }
-
-        printRouteData(routeData)
+        val bikeHopperFileCreator = BikeHopperFileCreator("nachos.fit", routeData)
+        bikeHopperFileCreator.getFile()
         return routeData
     }
 
+    // TODO: Remove me.
     fun printRouteData(routeData: RouteData) {
         println("*** Printing route points ***")
         for (p in routeData.paths[1].legs[0].geometry.coordinates) {

@@ -18,7 +18,6 @@ data class Paths(
 @Serializable
 data class Leg(
     val type: String,
-    // val geometry: ArrayList<ArrayList<Points>>
     val geometry: Points
 )
 
