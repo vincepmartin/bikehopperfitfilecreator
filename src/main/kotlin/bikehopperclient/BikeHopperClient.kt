@@ -55,6 +55,16 @@ public class BikeHopperClient() {
             // TODO: Make sure you have all the data that you need.
             routeData = response.body()
         }
+
+        printRouteData(routeData)
         return routeData
+    }
+
+    fun printRouteData(routeData: RouteData) {
+        println("*** Printing route points ***")
+        for (p in routeData.paths[0].legs[0].geometry.coordinates) {
+            println("${p[0]} ${p[1]} ${p[2]}")
+        }
+        println("*****************************")
     }
 }
