@@ -73,7 +73,6 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
             recordMessage.timestamp = lastTimeStamp
             recordMessages.add(recordMessage)
             lastTimeStamp.add(1) // Increment time stamp
-            printRecordMessage(recordMessage)
         }
     }
 
@@ -91,9 +90,5 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         eventStopMessage.event = Event.TIMER
         eventStopMessage.eventType = EventType.STOP_ALL
         bufferEncoder.write(eventStopMessage)
-    }
-
-    private fun printRecordMessage(rm: RecordMesg) {
-       println("${rm.positionLong}, ${rm.positionLat}, ${rm.altitude}, ${rm.timestamp}")
     }
 }
