@@ -12,9 +12,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import io.ktor.serialization.kotlinx.json.*
 
-import bikehopperclient.RouteData
-import bikehopperfilecreator.BikeHopperFileCreator
-
 public class BikeHopperClient() {
     // TODO: Have the url chosen via some env var or flag or something
     private val url = "https://api-bikehopper-staging.techlabor.org"
@@ -56,8 +53,6 @@ public class BikeHopperClient() {
             // TODO: Make sure you have all the data that you need.
             routeData = response.body()
         }
-        val bikeHopperFileCreator = BikeHopperFileCreator("nachos.fit", routeData)
-        bikeHopperFileCreator.getFile()
         return routeData
     }
 }

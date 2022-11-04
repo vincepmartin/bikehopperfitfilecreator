@@ -8,9 +8,10 @@ fun main() {
         .get("/") { ctx ->
             val bhClient = BikeHopperClient()
             val routeData = bhClient.fetchRoute(params = ctx.queryParamMap())
-            val bikeHopperFileCreator = BikeHopperFileCreator("nachos.fit", routeData)
+            val bikeHopperFileCreator = BikeHopperFileCreator(routeData)
             ctx.contentType("application/vnd.ant.fit")
-            ctx.result(bikeHopperFileCreator.getFile().inputStream())
+            // TODO: WUT?  Figure out a better way to handle this.
+            bikeHopperFileCreator.getBuffer()?.let { ctx.result(it) }
         }
         .start(9001)
 }
