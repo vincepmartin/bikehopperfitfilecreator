@@ -60,13 +60,4 @@ public class BikeHopperClient() {
         bikeHopperFileCreator.getFile()
         return routeData
     }
-
-    // TODO: Remove me.
-    fun printRouteData(routeData: RouteData) {
-        println("*** Printing route points ***")
-        for (p in routeData.paths[1].legs[0].geometry.coordinates) {
-            println("${p[0]} ${p[1]} ${p[2]}")
-        }
-        println("*****************************")
-    }
 }

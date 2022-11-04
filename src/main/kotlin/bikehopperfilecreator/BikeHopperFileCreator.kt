@@ -3,7 +3,6 @@ package bikehopperfilecreator
 import bikehopperclient.RouteData
 import com.garmin.fit.*
 import com.garmin.fit.util.SemicirclesConverter
-import java.nio.file.FileSystem
 import java.util.*
 
 class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
@@ -26,7 +25,8 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
         createRecordMessages()
         writeLapMessage()
         writeTimerStartMessage()
-        recordMessages.forEach { r -> fileEncoder.write(r) }
+        writeRecordMessages()
+        writeCoursePoints()
         writeTimerStopMessage()
 
         // Close file.
@@ -39,6 +39,15 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
 
         return java.io.File("nachos.fit")
         println("Encoded FIT file $fileName")
+    }
+
+    // Generate the turn by turn directions
+    private fun writeCoursePoints() {
+
+    }
+
+    private fun writeRecordMessages() {
+        recordMessages.forEach { r -> fileEncoder.write(r) }
     }
 
     private fun writeFileIdMessage() {
@@ -59,34 +68,33 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
     }
 
     private fun writeLapMessage() {
-        val lapMesg = LapMesg()
-        lapMesg.startTime = startTimeStamp
-        lapMesg.timestamp = startTimeStamp
-        lapMesg.totalElapsedTime =  (lastTimeStamp.timestamp - startTimeStamp.timestamp).toFloat()
-        lapMesg.totalTimerTime =  (lastTimeStamp.timestamp - startTimeStamp.timestamp).toFloat()
-        lapMesg.startPositionLong = recordMessages[0].positionLong
-        lapMesg.startPositionLat = recordMessages[0].positionLat
-        lapMesg.endPositionLong = recordMessages[recordMessages.size - 1].positionLong
-        lapMesg.endPositionLat = recordMessages[recordMessages.size - 1].positionLat
-        fileEncoder.write(lapMesg)
+        val lapMessage = LapMesg()
+        lapMessage.startTime = startTimeStamp
+        lapMessage.timestamp = startTimeStamp
+        lapMessage.totalElapsedTime =  (lastTimeStamp.timestamp - startTimeStamp.timestamp).toFloat()
+        lapMessage.totalTimerTime =  (lastTimeStamp.timestamp - startTimeStamp.timestamp).toFloat()
+        lapMessage.startPositionLong = recordMessages[0].positionLong
+        lapMessage.startPositionLat = recordMessages[0].positionLat
+        lapMessage.endPositionLong = recordMessages[recordMessages.size - 1].positionLong
+        lapMessage.endPositionLat = recordMessages[recordMessages.size - 1].positionLat
+        fileEncoder.write(lapMessage)
     }
 
     // Write the positions on our map.
-    // TODO: Loop through all points in our leg, add the required time stamp along with speed if actually needed.
     private fun createRecordMessages() {
         routeData.paths[1].legs[0].geometry.coordinates.forEach{ point ->
-            val recordMesg = RecordMesg()
-            recordMesg.positionLong = SemicirclesConverter.degreesToSemicircles(point[0])
-            recordMesg.positionLat = SemicirclesConverter.degreesToSemicircles(point[1])
-            recordMesg.altitude = point[2].toFloat()
-            recordMesg.timestamp = lastTimeStamp
-            recordMessages.add(recordMesg)
-            lastTimeStamp.add(1)
-            printRecordMessage(recordMesg)
+            val recordMessage = RecordMesg()
+            recordMessage.positionLong = SemicirclesConverter.degreesToSemicircles(point[0])
+            recordMessage.positionLat = SemicirclesConverter.degreesToSemicircles(point[1])
+            recordMessage.altitude = point[2].toFloat()
+            recordMessage.timestamp = lastTimeStamp
+            recordMessages.add(recordMessage)
+            lastTimeStamp.add(1) // Increment time stamp
+            printRecordMessage(recordMessage)
         }
     }
 
-    fun writeTimerStartMessage() {
+    private fun writeTimerStartMessage() {
         val eventStartMessage = EventMesg()
         eventStartMessage.timestamp = startTimeStamp
         eventStartMessage.event = Event.TIMER
@@ -94,7 +102,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
         fileEncoder.write(eventStartMessage)
     }
 
-    fun writeTimerStopMessage() {
+    private fun writeTimerStopMessage() {
         val eventStopMessage = EventMesg()
         eventStopMessage.timestamp = lastTimeStamp
         eventStopMessage.event = Event.TIMER
@@ -102,7 +110,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
         fileEncoder.write(eventStopMessage)
     }
 
-    fun printRecordMessage(rm: RecordMesg) {
+    private fun printRecordMessage(rm: RecordMesg) {
        println("${rm.positionLong}, ${rm.positionLat}, ${rm.altitude}, ${rm.timestamp}")
     }
 }
