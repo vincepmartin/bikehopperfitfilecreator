@@ -5,21 +5,14 @@ import com.garmin.fit.*
 import com.garmin.fit.util.SemicirclesConverter
 import java.util.*
 
-class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
-    private lateinit var fileEncoder: FileEncoder
+class BikeHopperFileCreator(private val routeData: RouteData) {
+    private val bufferEncoder = BufferEncoder(Fit.ProtocolVersion.V2_0)
     private val recordMessages = arrayListOf<RecordMesg>()
     private var startTimeStamp: DateTime = DateTime(Date())
     private var lastTimeStamp: DateTime = DateTime(Date())
     private val PRODUCTID = 0
 
-    fun getFile(): java.io.File {
-        // Open file
-        try {
-            fileEncoder = FileEncoder(java.io.File(fileName), Fit.ProtocolVersion.V2_0)
-        } catch(e: FitRuntimeException) {
-            System.err.println("Error opening file $fileName")
-        }
-
+    fun getBuffer(): ByteArray? {
         writeFileIdMessage()
         writeCourseMessage()
         createRecordMessages()
@@ -28,17 +21,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
         writeRecordMessages()
         writeCoursePoints()
         writeTimerStopMessage()
-
-        // Close file.
-        try {
-            fileEncoder.close()
-        } catch (e: FitRuntimeException) {
-            System.err.println("Error closing file $fileName")
-            e.printStackTrace()
-        }
-
-        return java.io.File("nachos.fit")
-        println("Encoded FIT file $fileName")
+        return bufferEncoder.close()
     }
 
     // Generate the turn by turn directions
@@ -47,7 +30,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
     }
 
     private fun writeRecordMessages() {
-        recordMessages.forEach { r -> fileEncoder.write(r) }
+        recordMessages.forEach { r -> bufferEncoder.write(r) }
     }
 
     private fun writeFileIdMessage() {
@@ -57,14 +40,14 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
         fileIdMessage.product = PRODUCTID
         fileIdMessage.timeCreated = startTimeStamp // Set to now...
         fileIdMessage.serialNumber = 12345L
-        fileEncoder.write(fileIdMessage)
+        bufferEncoder.write(fileIdMessage)
     }
 
     private fun writeCourseMessage() {
         val courseMessage = CourseMesg()
         courseMessage.name = "BikeHopper Course" // TODO: Change this to something that makes sense for the route, figure out where to get this data.
         courseMessage.sport = Sport.CYCLING
-        fileEncoder.write(courseMessage)
+        bufferEncoder.write(courseMessage)
     }
 
     private fun writeLapMessage() {
@@ -77,7 +60,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
         lapMessage.startPositionLat = recordMessages[0].positionLat
         lapMessage.endPositionLong = recordMessages[recordMessages.size - 1].positionLong
         lapMessage.endPositionLat = recordMessages[recordMessages.size - 1].positionLat
-        fileEncoder.write(lapMessage)
+        bufferEncoder.write(lapMessage)
     }
 
     // Write the positions on our map.
@@ -99,7 +82,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
         eventStartMessage.timestamp = startTimeStamp
         eventStartMessage.event = Event.TIMER
         eventStartMessage.eventType = EventType.START
-        fileEncoder.write(eventStartMessage)
+        bufferEncoder.write(eventStartMessage)
     }
 
     private fun writeTimerStopMessage() {
@@ -107,7 +90,7 @@ class BikeHopperFileCreator(val fileName: String, val routeData: RouteData) {
         eventStopMessage.timestamp = lastTimeStamp
         eventStopMessage.event = Event.TIMER
         eventStopMessage.eventType = EventType.STOP_ALL
-        fileEncoder.write(eventStopMessage)
+        bufferEncoder.write(eventStopMessage)
     }
 
     private fun printRecordMessage(rm: RecordMesg) {
