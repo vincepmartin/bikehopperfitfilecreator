@@ -12,7 +12,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
     private var lastTimeStamp: DateTime = DateTime(Date())
     private val PRODUCTID = 0
 
-    fun getBuffer(): ByteArray? {
+    fun getBuffer(): ByteArray {
         writeFileIdMessage()
         writeCourseMessage()
         createRecordMessages()
@@ -26,7 +26,15 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
 
     // Generate the turn by turn directions
     private fun writeCoursePoints() {
-
+        routeData.paths[0].instructions.forEach{i ->
+            val coursePointMessage = CoursePointMesg()
+            coursePointMessage.timestamp = recordMessages[i.interval[0]].timestamp
+            coursePointMessage.name = i.text
+            coursePointMessage.positionLong = recordMessages[i.interval[0]].positionLong
+            coursePointMessage.positionLat = recordMessages[i.interval[0]].positionLat
+            println("CP Message: ${coursePointMessage.positionLong} ${coursePointMessage.positionLat}")
+            bufferEncoder.write(coursePointMessage)
+        }
     }
 
     private fun writeRecordMessages() {
@@ -65,7 +73,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
 
     // Write the positions on our map.
     private fun createRecordMessages() {
-        routeData.paths[1].legs[0].geometry.coordinates.forEach{ point ->
+        routeData.paths[0].legs[0].geometry.coordinates.forEach{ point ->
             val recordMessage = RecordMesg()
             recordMessage.positionLong = SemicirclesConverter.degreesToSemicircles(point[0])
             recordMessage.positionLat = SemicirclesConverter.degreesToSemicircles(point[1])
