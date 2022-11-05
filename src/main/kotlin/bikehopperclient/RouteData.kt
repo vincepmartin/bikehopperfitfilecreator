@@ -32,5 +32,6 @@ data class Points(
 data class Instructions(
     val text: String,
     val street_name: String,
+    val sign: Int,
     val interval: ArrayList<Int>
 )

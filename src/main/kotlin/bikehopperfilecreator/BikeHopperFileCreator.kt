@@ -27,13 +27,11 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
     // Generate the turn by turn directions
     private fun writeCoursePoints() {
         routeData.paths[0].instructions.forEach{i ->
-            val coursePointMessage = CoursePointMesg()
-            coursePointMessage.timestamp = recordMessages[i.interval[0]].timestamp
-            coursePointMessage.name = i.text
-            coursePointMessage.positionLong = recordMessages[i.interval[0]].positionLong
-            coursePointMessage.positionLat = recordMessages[i.interval[0]].positionLat
-            println("CP Message: ${coursePointMessage.positionLong} ${coursePointMessage.positionLat}")
-            bufferEncoder.write(coursePointMessage)
+            val bhCPM = BHCoursePointMessage(i, recordMessages[i.interval[0]])
+            val garminCPM = bhCPM.getMessage()
+            println("CP Message: ${garminCPM.positionLong} ${garminCPM.positionLat} ${garminCPM.timestamp}")
+            println("RecordMessage: ${recordMessages[i.interval[0]].positionLong} ${recordMessages[i.interval[0]].positionLat} ${recordMessages[i.interval[0]].timestamp}")
+            bufferEncoder.write(garminCPM)
         }
     }
 
