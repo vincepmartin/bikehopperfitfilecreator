@@ -24,6 +24,61 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         return bufferEncoder.close()
     }
 
+    private fun writeFileIdMessage() {
+        val fileIdMessage = FileIdMesg()
+        fileIdMessage.type = File.COURSE
+        fileIdMessage.manufacturer = Manufacturer.GARMIN
+        fileIdMessage.product = PRODUCTID
+        fileIdMessage.timeCreated = startTimeStamp // Set to now...
+        fileIdMessage.serialNumber = 12345L
+        bufferEncoder.write(fileIdMessage)
+    }
+
+    private fun writeCourseMessage() {
+        val courseMessage = CourseMesg()
+        courseMessage.name = "BikeHopper Course" // TODO: Change this to something that makes sense for the route, figure out where to get this data.
+        courseMessage.sport = Sport.CYCLING
+        courseMessage.localNum = 1
+        bufferEncoder.write(courseMessage)
+    }
+
+    private fun writeLapMessage() {
+        val lapMessage = LapMesg()
+        lapMessage.startTime = startTimeStamp
+        lapMessage.timestamp = startTimeStamp
+        lapMessage.totalElapsedTime =  (lastTimeStamp.timestamp - startTimeStamp.timestamp).toFloat()
+        lapMessage.totalTimerTime =  (lastTimeStamp.timestamp - startTimeStamp.timestamp).toFloat()
+        lapMessage.startPositionLong = recordMessages[0].positionLong
+        lapMessage.startPositionLat = recordMessages[0].positionLat
+        lapMessage.endPositionLong = recordMessages[recordMessages.size - 1].positionLong
+        lapMessage.endPositionLat = recordMessages[recordMessages.size - 1].positionLat
+        lapMessage.localNum = 2
+        bufferEncoder.write(lapMessage)
+    }
+
+    // Create the RecordMessages/positions for our map.
+    private fun createRecordMessages() {
+        routeData.paths[0].legs[0].geometry.coordinates.forEach{ point ->
+            val recordMessage = RecordMesg()
+            recordMessage.positionLong = SemicirclesConverter.degreesToSemicircles(point[0])
+            recordMessage.positionLat = SemicirclesConverter.degreesToSemicircles(point[1])
+            recordMessage.altitude = point[2].toFloat()
+            recordMessage.timestamp = lastTimeStamp
+            recordMessage.localNum = 5
+            recordMessages.add(recordMessage)
+            lastTimeStamp.add(1) // Increment time stamp
+        }
+    }
+
+    private fun writeTimerStartMessage() {
+        val eventStartMessage = EventMesg()
+        eventStartMessage.timestamp = startTimeStamp
+        eventStartMessage.event = Event.TIMER
+        eventStartMessage.eventType = EventType.START
+        eventStartMessage.localNum = 3
+        bufferEncoder.write(eventStartMessage)
+    }
+
     // Generate the turn by turn directions
     private fun writeCoursePoints() {
         routeData.paths[0].instructions.forEach{i ->
@@ -39,62 +94,12 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         recordMessages.forEach { r -> bufferEncoder.write(r) }
     }
 
-    private fun writeFileIdMessage() {
-        val fileIdMessage = FileIdMesg()
-        fileIdMessage.type = File.COURSE
-        fileIdMessage.manufacturer = Manufacturer.DEVELOPMENT
-        fileIdMessage.product = PRODUCTID
-        fileIdMessage.timeCreated = startTimeStamp // Set to now...
-        fileIdMessage.serialNumber = 12345L
-        bufferEncoder.write(fileIdMessage)
-    }
-
-    private fun writeCourseMessage() {
-        val courseMessage = CourseMesg()
-        courseMessage.name = "BikeHopper Course" // TODO: Change this to something that makes sense for the route, figure out where to get this data.
-        courseMessage.sport = Sport.CYCLING
-        bufferEncoder.write(courseMessage)
-    }
-
-    private fun writeLapMessage() {
-        val lapMessage = LapMesg()
-        lapMessage.startTime = startTimeStamp
-        lapMessage.timestamp = startTimeStamp
-        lapMessage.totalElapsedTime =  (lastTimeStamp.timestamp - startTimeStamp.timestamp).toFloat()
-        lapMessage.totalTimerTime =  (lastTimeStamp.timestamp - startTimeStamp.timestamp).toFloat()
-        lapMessage.startPositionLong = recordMessages[0].positionLong
-        lapMessage.startPositionLat = recordMessages[0].positionLat
-        lapMessage.endPositionLong = recordMessages[recordMessages.size - 1].positionLong
-        lapMessage.endPositionLat = recordMessages[recordMessages.size - 1].positionLat
-        bufferEncoder.write(lapMessage)
-    }
-
-    // Write the positions on our map.
-    private fun createRecordMessages() {
-        routeData.paths[0].legs[0].geometry.coordinates.forEach{ point ->
-            val recordMessage = RecordMesg()
-            recordMessage.positionLong = SemicirclesConverter.degreesToSemicircles(point[0])
-            recordMessage.positionLat = SemicirclesConverter.degreesToSemicircles(point[1])
-            recordMessage.altitude = point[2].toFloat()
-            recordMessage.timestamp = lastTimeStamp
-            recordMessages.add(recordMessage)
-            lastTimeStamp.add(1) // Increment time stamp
-        }
-    }
-
-    private fun writeTimerStartMessage() {
-        val eventStartMessage = EventMesg()
-        eventStartMessage.timestamp = startTimeStamp
-        eventStartMessage.event = Event.TIMER
-        eventStartMessage.eventType = EventType.START
-        bufferEncoder.write(eventStartMessage)
-    }
-
     private fun writeTimerStopMessage() {
         val eventStopMessage = EventMesg()
         eventStopMessage.timestamp = lastTimeStamp
         eventStopMessage.event = Event.TIMER
         eventStopMessage.eventType = EventType.STOP_ALL
+        eventStopMessage.localNum = 3
         bufferEncoder.write(eventStopMessage)
     }
 }

@@ -51,9 +51,6 @@ public class BikeHopperClient() {
                     parameters.append("details", "cycleway")
                     parameters.append("details","road_class")
                     parameters.append("details","street_name")
-                    // parameters.append("point","37.78306,-122.45867")
-                    // parameters.append("point","37.79183,-122.39415")
-                    // NEW
                     parameters.append("point","37.78306,-122.45867")
                     parameters.append("point","37.78516,-122.46238")
                 }
