@@ -34,8 +34,9 @@ class BHCoursePointMessage(private val instruction: Instructions, private val co
         val cpm = CoursePointMesg()
         cpm.timestamp = correspondingRecordMessage.timestamp
         cpm.name = instruction.text
-        // cpm.positionLong = correspondingRecordMessage.positionLong
-        // cpm.positionLat = correspondingRecordMessage.positionLat
+        cpm.positionLong = correspondingRecordMessage.positionLong
+        cpm.positionLat = correspondingRecordMessage.positionLat
+        cpm.distance = correspondingRecordMessage.distance
         cpm.type = getGarminSignFromGraphHopper(instruction.sign)
         cpm.localNum = 4
         return cpm

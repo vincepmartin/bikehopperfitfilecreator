@@ -16,6 +16,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         writeFileIdMessage()
         writeCourseMessage()
         createRecordMessages()
+        calculateDistanceToPriorPointInMeters()
         writeLapMessage()
         writeTimerStartMessage()
         writeRecordMessages()
@@ -65,6 +66,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
             recordMessage.altitude = point[2].toFloat()
             recordMessage.timestamp = lastTimeStamp
             recordMessage.localNum = 5
+            // TODO: Add Distance field, which is the distance from the first point.
             recordMessages.add(recordMessage)
             lastTimeStamp.add(1) // Increment time stamp
         }
@@ -92,6 +94,31 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
 
     private fun writeRecordMessages() {
         recordMessages.forEach { r -> bufferEncoder.write(r) }
+    }
+
+    private fun findDistanceInMetersBetweenTwoGPSPoints(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val earthRadius = 6371000.0 //meters
+        val dLat = Math.toRadians(lat2-lat1)
+        val dLng = Math.toRadians(lon2-lon1)
+        val a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLng/2) * Math.sin(dLng/2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+        return earthRadius * c
+    }
+
+    private fun calculateDistanceToPriorPointInMeters() {
+        var distance = 0.0
+        recordMessages.forEachIndexed { index, recordMessage ->
+            if (index > 0) {
+                val priorRecordMessage = recordMessages[index - 1]
+                distance += findDistanceInMetersBetweenTwoGPSPoints(
+                        SemicirclesConverter.semicirclesToDegrees(priorRecordMessage.positionLat),
+                        SemicirclesConverter.semicirclesToDegrees(priorRecordMessage.positionLong),
+                        SemicirclesConverter.semicirclesToDegrees(recordMessage.positionLat),
+                        SemicirclesConverter.semicirclesToDegrees(recordMessage.positionLong)
+                )
+            }
+            recordMessage.distance = distance.toFloat()
+        }
     }
 
     private fun writeTimerStopMessage() {
