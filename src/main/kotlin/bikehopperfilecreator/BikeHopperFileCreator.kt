@@ -11,6 +11,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
     private var startTimeStamp: DateTime = DateTime(Date())
     private var lastTimeStamp: DateTime = DateTime(Date())
     private val PRODUCTID = 0
+    private final val TIME_INCREMENT = 100.0
 
     fun getBuffer(): ByteArray {
         writeFileIdMessage()
@@ -31,6 +32,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         fileIdMessage.manufacturer = Manufacturer.GARMIN
         fileIdMessage.product = PRODUCTID
         fileIdMessage.timeCreated = startTimeStamp // Set to now...
+        startTimeStamp.add(TIME_INCREMENT)
         fileIdMessage.serialNumber = 12345L
         bufferEncoder.write(fileIdMessage)
     }
@@ -54,6 +56,8 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         lapMessage.endPositionLong = recordMessages[recordMessages.size - 1].positionLong
         lapMessage.endPositionLat = recordMessages[recordMessages.size - 1].positionLat
         lapMessage.localNum = 2
+        // Adding total distance to lap message
+        lapMessage.totalDistance = 1f
         bufferEncoder.write(lapMessage)
     }
 
@@ -66,9 +70,8 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
             recordMessage.altitude = point[2].toFloat()
             recordMessage.timestamp = lastTimeStamp
             recordMessage.localNum = 5
-            // TODO: Add Distance field, which is the distance from the first point.
             recordMessages.add(recordMessage)
-            lastTimeStamp.add(1) // Increment time stamp
+            lastTimeStamp.add(TIME_INCREMENT) // Increment time stamp
         }
     }
 
