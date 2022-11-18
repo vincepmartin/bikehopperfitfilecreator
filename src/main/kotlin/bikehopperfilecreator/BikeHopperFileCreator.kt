@@ -4,14 +4,18 @@ import bikehopperclient.RouteData
 import com.garmin.fit.*
 import com.garmin.fit.util.SemicirclesConverter
 import java.util.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class BikeHopperFileCreator(private val routeData: RouteData) {
     private val bufferEncoder = BufferEncoder(Fit.ProtocolVersion.V2_0)
     private val recordMessages = arrayListOf<RecordMesg>()
     private var startTimeStamp: DateTime = DateTime(Date())
     private var lastTimeStamp: DateTime = DateTime(Date())
-    private val PRODUCTID = 0
-    private val TIME_INCREMENT = 100.0
+    private val productId = 0
+    private val timeIncrement = 100.0
 
     fun getBuffer(): ByteArray {
         writeFileIdMessage()
@@ -30,9 +34,9 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         val fileIdMessage = FileIdMesg()
         fileIdMessage.type = File.COURSE
         fileIdMessage.manufacturer = Manufacturer.GARMIN
-        fileIdMessage.product = PRODUCTID
+        fileIdMessage.product = productId
         fileIdMessage.timeCreated = startTimeStamp // Set to now...
-        startTimeStamp.add(TIME_INCREMENT)
+        startTimeStamp.add(timeIncrement)
         fileIdMessage.serialNumber = 12345L
         bufferEncoder.write(fileIdMessage)
     }
@@ -69,7 +73,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
             recordMessage.timestamp = lastTimeStamp
             recordMessage.localNum = 5
             recordMessages.add(recordMessage)
-            lastTimeStamp.add(TIME_INCREMENT) // Increment time stamp
+            lastTimeStamp.add(timeIncrement) // Increment time stamp
         }
     }
 
@@ -101,8 +105,8 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         val earthRadius = 6371000.0 //meters
         val dLat = Math.toRadians(lat2-lat1)
         val dLng = Math.toRadians(lon2-lon1)
-        val a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLng/2) * Math.sin(dLng/2)
-        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+        val a = sin(dLat/2) * sin(dLat/2) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLng/2) * sin(dLng/2)
+        val c = 2 * atan2(sqrt(a), sqrt(1-a))
         return earthRadius * c
     }
 
