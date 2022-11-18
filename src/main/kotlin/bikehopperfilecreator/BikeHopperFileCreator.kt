@@ -11,7 +11,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
     private var startTimeStamp: DateTime = DateTime(Date())
     private var lastTimeStamp: DateTime = DateTime(Date())
     private val PRODUCTID = 0
-    private final val TIME_INCREMENT = 100.0
+    private val TIME_INCREMENT = 100.0
 
     fun getBuffer(): ByteArray {
         writeFileIdMessage()
@@ -39,7 +39,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
 
     private fun writeCourseMessage() {
         val courseMessage = CourseMesg()
-        courseMessage.name = "BikeHopper Course" // TODO: Change this to something that makes sense for the route, figure out where to get this data.
+        courseMessage.name = "BikeHopper Course"
         courseMessage.sport = Sport.CYCLING
         courseMessage.localNum = 1
         bufferEncoder.write(courseMessage)
@@ -56,8 +56,6 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         lapMessage.endPositionLong = recordMessages[recordMessages.size - 1].positionLong
         lapMessage.endPositionLat = recordMessages[recordMessages.size - 1].positionLat
         lapMessage.localNum = 2
-        // Adding total distance to lap message
-        lapMessage.totalDistance = 1f
         bufferEncoder.write(lapMessage)
     }
 

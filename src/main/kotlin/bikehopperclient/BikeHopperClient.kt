@@ -14,7 +14,6 @@ import io.ktor.serialization.kotlinx.json.*
 
 public class BikeHopperClient() {
     // TODO: Have the url chosen via some env var or flag or something
-    // private val url = "https://api-bikehopper-staging.techlabor.org"
     private val url = "https://api-staging.bikehopper.org"
     private val client = HttpClient(CIO) {
         install(Logging)
