@@ -14,7 +14,7 @@ import io.ktor.serialization.kotlinx.json.*
 
 public class BikeHopperClient() {
     // TODO: Have the url chosen via some env var or flag or something
-    private val url = "https://api-bikehopper-staging.techlabor.org"
+    private val url = "https://api-staging.bikehopper.org"
     private val client = HttpClient(CIO) {
         install(Logging)
         install(ContentNegotiation) {
@@ -27,6 +27,11 @@ public class BikeHopperClient() {
     }
 
     // TODO: Eventually make this grab params from the front end that are passed to Javalin.  For now just use this manual version.
+    /*
+    curl 'https://api.bikehopper.org/v1/graphhopper/route-pt?locale=en-US&elevation=true&useMiles=false&layer=OpenStreetMap&profile=pt&optimize=true&pointsEncoded=false&pt.earliest_departure_time=2022-11-04T23%3A01%3A56.126Z&pt.connecting_profile=bike2&pt.arrive_by=false&details=cycleway&details=road_class&details=street_name
+    &point=37.78306%2C-122.45867
+    &point=37.78516%2C-122.46238' \
+    */
     fun fetchRoute(params: Map<String, List<String>>): RouteData {
         val routeData: RouteData
         runBlocking {
@@ -47,7 +52,7 @@ public class BikeHopperClient() {
                     parameters.append("details","road_class")
                     parameters.append("details","street_name")
                     parameters.append("point","37.78306,-122.45867")
-                    parameters.append("point","37.79183,-122.39415")
+                    parameters.append("point","37.78516,-122.46238")
                 }
             }
             // TODO: Make sure you have all the data that you need.

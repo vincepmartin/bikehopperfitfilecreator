@@ -12,7 +12,8 @@ data class Paths(
     val transfers: Int,
     val points_encoded: Boolean,
     val legs: ArrayList<Leg>,
-    val points: Points
+    val points: Points,
+    val instructions: ArrayList<Instructions>
 )
 
 @Serializable
@@ -25,4 +26,12 @@ data class Leg(
 data class Points(
     val type: String,
     val coordinates: ArrayList<ArrayList<Double>>
+)
+
+@Serializable
+data class Instructions(
+    val text: String,
+    val street_name: String,
+    val sign: Int,
+    val interval: ArrayList<Int>
 )

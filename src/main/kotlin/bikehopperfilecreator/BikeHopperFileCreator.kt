@@ -4,18 +4,24 @@ import bikehopperclient.RouteData
 import com.garmin.fit.*
 import com.garmin.fit.util.SemicirclesConverter
 import java.util.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class BikeHopperFileCreator(private val routeData: RouteData) {
     private val bufferEncoder = BufferEncoder(Fit.ProtocolVersion.V2_0)
     private val recordMessages = arrayListOf<RecordMesg>()
     private var startTimeStamp: DateTime = DateTime(Date())
     private var lastTimeStamp: DateTime = DateTime(Date())
-    private val PRODUCTID = 0
+    private val productId = 0
+    private val timeIncrement = 100.0
 
-    fun getBuffer(): ByteArray? {
+    fun getBuffer(): ByteArray {
         writeFileIdMessage()
         writeCourseMessage()
         createRecordMessages()
+        calculateDistanceToPriorPointInMeters()
         writeLapMessage()
         writeTimerStartMessage()
         writeRecordMessages()
@@ -24,29 +30,22 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         return bufferEncoder.close()
     }
 
-    // Generate the turn by turn directions
-    private fun writeCoursePoints() {
-
-    }
-
-    private fun writeRecordMessages() {
-        recordMessages.forEach { r -> bufferEncoder.write(r) }
-    }
-
     private fun writeFileIdMessage() {
         val fileIdMessage = FileIdMesg()
         fileIdMessage.type = File.COURSE
-        fileIdMessage.manufacturer = Manufacturer.DEVELOPMENT
-        fileIdMessage.product = PRODUCTID
+        fileIdMessage.manufacturer = Manufacturer.GARMIN
+        fileIdMessage.product = productId
         fileIdMessage.timeCreated = startTimeStamp // Set to now...
+        startTimeStamp.add(timeIncrement)
         fileIdMessage.serialNumber = 12345L
         bufferEncoder.write(fileIdMessage)
     }
 
     private fun writeCourseMessage() {
         val courseMessage = CourseMesg()
-        courseMessage.name = "BikeHopper Course" // TODO: Change this to something that makes sense for the route, figure out where to get this data.
+        courseMessage.name = "BikeHopper Course"
         courseMessage.sport = Sport.CYCLING
+        courseMessage.localNum = 1
         bufferEncoder.write(courseMessage)
     }
 
@@ -60,20 +59,21 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         lapMessage.startPositionLat = recordMessages[0].positionLat
         lapMessage.endPositionLong = recordMessages[recordMessages.size - 1].positionLong
         lapMessage.endPositionLat = recordMessages[recordMessages.size - 1].positionLat
+        lapMessage.localNum = 2
         bufferEncoder.write(lapMessage)
     }
 
-    // Write the positions on our map.
+    // Create the RecordMessages/positions for our map.
     private fun createRecordMessages() {
-        routeData.paths[1].legs[0].geometry.coordinates.forEach{ point ->
+        routeData.paths[0].legs[0].geometry.coordinates.forEach{ point ->
             val recordMessage = RecordMesg()
             recordMessage.positionLong = SemicirclesConverter.degreesToSemicircles(point[0])
             recordMessage.positionLat = SemicirclesConverter.degreesToSemicircles(point[1])
             recordMessage.altitude = point[2].toFloat()
             recordMessage.timestamp = lastTimeStamp
+            recordMessage.localNum = 5
             recordMessages.add(recordMessage)
-            lastTimeStamp.add(1) // Increment time stamp
-            printRecordMessage(recordMessage)
+            lastTimeStamp.add(timeIncrement) // Increment time stamp
         }
     }
 
@@ -82,7 +82,48 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         eventStartMessage.timestamp = startTimeStamp
         eventStartMessage.event = Event.TIMER
         eventStartMessage.eventType = EventType.START
+        eventStartMessage.localNum = 3
         bufferEncoder.write(eventStartMessage)
+    }
+
+    // Generate the turn by turn directions
+    private fun writeCoursePoints() {
+        routeData.paths[0].instructions.forEach{i ->
+            val bhCPM = BHCoursePointMessage(i, recordMessages[i.interval[0]])
+            val garminCPM = bhCPM.getMessage()
+            println("CP Message: ${garminCPM.positionLong} ${garminCPM.positionLat} ${garminCPM.timestamp}")
+            println("RecordMessage: ${recordMessages[i.interval[0]].positionLong} ${recordMessages[i.interval[0]].positionLat} ${recordMessages[i.interval[0]].timestamp}")
+            bufferEncoder.write(garminCPM)
+        }
+    }
+
+    private fun writeRecordMessages() {
+        recordMessages.forEach { r -> bufferEncoder.write(r) }
+    }
+
+    private fun findDistanceInMetersBetweenTwoGPSPoints(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val earthRadius = 6371000.0 //meters
+        val dLat = Math.toRadians(lat2-lat1)
+        val dLng = Math.toRadians(lon2-lon1)
+        val a = sin(dLat/2) * sin(dLat/2) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLng/2) * sin(dLng/2)
+        val c = 2 * atan2(sqrt(a), sqrt(1-a))
+        return earthRadius * c
+    }
+
+    private fun calculateDistanceToPriorPointInMeters() {
+        var distance = 0.0
+        recordMessages.forEachIndexed { index, recordMessage ->
+            if (index > 0) {
+                val priorRecordMessage = recordMessages[index - 1]
+                distance += findDistanceInMetersBetweenTwoGPSPoints(
+                        SemicirclesConverter.semicirclesToDegrees(priorRecordMessage.positionLat),
+                        SemicirclesConverter.semicirclesToDegrees(priorRecordMessage.positionLong),
+                        SemicirclesConverter.semicirclesToDegrees(recordMessage.positionLat),
+                        SemicirclesConverter.semicirclesToDegrees(recordMessage.positionLong)
+                )
+            }
+            recordMessage.distance = distance.toFloat()
+        }
     }
 
     private fun writeTimerStopMessage() {
@@ -90,10 +131,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         eventStopMessage.timestamp = lastTimeStamp
         eventStopMessage.event = Event.TIMER
         eventStopMessage.eventType = EventType.STOP_ALL
+        eventStopMessage.localNum = 3
         bufferEncoder.write(eventStopMessage)
-    }
-
-    private fun printRecordMessage(rm: RecordMesg) {
-       println("${rm.positionLong}, ${rm.positionLat}, ${rm.altitude}, ${rm.timestamp}")
     }
 }
