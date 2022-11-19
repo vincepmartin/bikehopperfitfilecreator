@@ -3,6 +3,7 @@ package bikehopperclient
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -27,6 +28,7 @@ public class BikeHopperClient() {
         }
     }
 
+    @Throws(ClientRequestException::class)
     fun fetchRoute(params: Map<String, List<String>>): RouteData {
         val routeData: RouteData
         runBlocking {

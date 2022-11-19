@@ -9,7 +9,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-class BikeHopperFileCreator(private val routeData: RouteData) {
+class BikeHopperFileCreator(private val routeData: RouteData)  {
     private val bufferEncoder = BufferEncoder(Fit.ProtocolVersion.V2_0)
     private val recordMessages = arrayListOf<RecordMesg>()
     private var startTimeStamp: DateTime = DateTime(Date())
@@ -18,16 +18,22 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
     private val timeIncrement = 100.0
 
     fun getBuffer(): ByteArray {
-        writeFileIdMessage()
-        writeCourseMessage()
-        createRecordMessages()
-        calculateDistanceToPriorPointInMeters()
-        writeLapMessage()
-        writeTimerStartMessage()
-        writeRecordMessages()
-        writeCoursePoints()
-        writeTimerStopMessage()
-        return bufferEncoder.close()
+        try {
+            writeFileIdMessage()
+            writeCourseMessage()
+            createRecordMessages()
+            calculateDistanceToPriorPointInMeters()
+            writeLapMessage()
+            writeTimerStartMessage()
+            writeRecordMessages()
+            writeCoursePoints()
+            writeTimerStopMessage()
+            return bufferEncoder.close()
+        }
+        catch (e: FitRuntimeException) {
+            println("Error creating FIT file: ${e.message}")
+            throw BikeHopperFileCreatorException()
+        }
     }
 
     private fun writeFileIdMessage() {
@@ -133,3 +139,5 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         bufferEncoder.write(eventStopMessage)
     }
 }
+
+class BikeHopperFileCreatorException: FitRuntimeException("Error creating fit file.")
