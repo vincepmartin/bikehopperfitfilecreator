@@ -1,4 +1,4 @@
-I want to be able to use http://bikemapper.org in a way which lets me dowload the cycling directions in a fit file format by garmin.  This will allow me to put my phone away while I ride and use my cycling computer.
+I want to be able to use https://bikemapper.org in a way which lets me dowload the cycling directions in a fit file format by garmin.  This will allow me to put my phone away while I ride and use my cycling computer.
 
 ## Initial Approach
 Initially I took the approach of trying to write my own fit file encoder that would take the geoJSON data from bikemapper's back end and convert that to a fit file.  This was a bit too complicated, and I was having problems doing it on the front end.
