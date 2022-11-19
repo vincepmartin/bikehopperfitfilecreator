@@ -73,7 +73,7 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
             recordMessage.timestamp = lastTimeStamp
             recordMessage.localNum = 5
             recordMessages.add(recordMessage)
-            lastTimeStamp.add(timeIncrement) // Increment time stamp
+            lastTimeStamp.add(timeIncrement) // Increment time stamp between each point
         }
     }
 
@@ -91,8 +91,6 @@ class BikeHopperFileCreator(private val routeData: RouteData) {
         routeData.paths[0].instructions.forEach{i ->
             val bhCPM = BHCoursePointMessage(i, recordMessages[i.interval[0]])
             val garminCPM = bhCPM.getMessage()
-            println("CP Message: ${garminCPM.positionLong} ${garminCPM.positionLat} ${garminCPM.timestamp}")
-            println("RecordMessage: ${recordMessages[i.interval[0]].positionLong} ${recordMessages[i.interval[0]].positionLat} ${recordMessages[i.interval[0]].timestamp}")
             bufferEncoder.write(garminCPM)
         }
     }
