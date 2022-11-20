@@ -21,7 +21,7 @@ Basically What I'm doing is taking the exact query params that are passed to our
 The only difference is we now can pass an additional `path` parameter that tells the fit file server creator which path to use when creating the .fit file.
 
 Here is a silly graph
-
+```
    ┌─────────┐         ┌─────────┐
    │         │   get*  │         │
    │ Browser ├────────►│ Fit Svr │
@@ -37,4 +37,4 @@ Here is a silly graph
                └─────────────────┘
 
     * Matchs with params sent to bikehopper backend
-
+```
