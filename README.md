@@ -15,3 +15,26 @@ I am going to use the following
 - Javalin (https://javalin.io/)
 - Garmin SDK (https://developer.garmin.com/fit/download/)
 - ktor-client (https://ktor.io/docs)
+
+## General Data Flow
+Basically What I'm doing is taking the exact query params that are passed to our backend from the web app and passing them to this fit file creator.
+The only difference is we now can pass an additional `path` parameter that tells the fit file server creator which path to use when creating the .fit file.
+
+Here is a silly graph
+
+   ┌─────────┐         ┌─────────┐
+   │         │   get*  │         │
+   │ Browser ├────────►│ Fit Svr │
+   │         │         │         │
+   └─────────┘         └─┬───────┘
+       ▲                 │
+       │ .fit file       │ sans (path param)
+       │                 ▼
+       │       ┌─────────────────┐
+       │       │                 │
+       └───────┤    Bikehopper   │
+               │                 │
+               └─────────────────┘
+
+    * Matchs with params sent to bikehopper backend
+
