@@ -23,6 +23,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:2.1.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.1.3")
     implementation("io.ktor:ktor-client-content-negotiation:2.1.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4")
 }
 
 tasks.test {
