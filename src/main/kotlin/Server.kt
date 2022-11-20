@@ -9,8 +9,13 @@ fun main() {
 
     app.get("/fit") { ctx ->
         val bhClient = BikeHopperClient()
-        val routeData = bhClient.fetchRoute(ctx.queryParamMap())
-        val bikeHopperFileCreator = BikeHopperFileCreator(routeData)
+
+        // Use bhClient to fetch our routes after pulling out the "path" param which is only used locally.
+        val routeData = bhClient.fetchRoute(ctx.queryParamMap().filter{ it.key != "path"})
+        // Quick check that the path we choose actually exists and has just a single leg.
+        // TODO: Figure out a better check eventually.
+        val path = ctx.queryParamAsClass<Int>("path", Int::class.java).check({it >= 0 && it < routeData.paths.size && routeData.paths[it].legs.size == 1 }, "Invalid path requested").get()
+        val bikeHopperFileCreator = BikeHopperFileCreator(routeData, path)
         ctx.contentType("application/vnd.ant.fit")
         ctx.result(bikeHopperFileCreator.getBuffer())
     }

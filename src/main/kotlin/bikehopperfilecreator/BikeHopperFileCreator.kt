@@ -9,7 +9,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-class BikeHopperFileCreator(private val routeData: RouteData)  {
+class BikeHopperFileCreator(private val routeData: RouteData, private val path: Int)  {
     private val bufferEncoder = BufferEncoder(Fit.ProtocolVersion.V2_0)
     private val recordMessages = arrayListOf<RecordMesg>()
     private var startTimeStamp: DateTime = DateTime(Date())
@@ -71,7 +71,7 @@ class BikeHopperFileCreator(private val routeData: RouteData)  {
 
     // Create the RecordMessages/positions for our map.
     private fun createRecordMessages() {
-        routeData.paths[0].legs[0].geometry.coordinates.forEach{ point ->
+        routeData.paths[path].legs[0].geometry.coordinates.forEach{ point ->
             val recordMessage = RecordMesg()
             recordMessage.positionLong = SemicirclesConverter.degreesToSemicircles(point[0])
             recordMessage.positionLat = SemicirclesConverter.degreesToSemicircles(point[1])
@@ -94,7 +94,7 @@ class BikeHopperFileCreator(private val routeData: RouteData)  {
 
     // Generate the turn by turn directions
     private fun writeCoursePoints() {
-        routeData.paths[0].instructions.forEach{i ->
+        routeData.paths[path].instructions.forEach{i ->
             val bhCPM = BHCoursePointMessage(i, recordMessages[i.interval[0]])
             val garminCPM = bhCPM.getMessage()
             bufferEncoder.write(garminCPM)
