@@ -26,5 +26,6 @@ fun main() {
         ctx.status(500)
         ctx.result(e.localizedMessage)
     }
+
     app.start(9001)
 }
